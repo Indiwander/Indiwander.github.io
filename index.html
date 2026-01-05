@@ -1,195 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IndiWander | Explore the World</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IndiWander | Explore the World</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
 
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: radial-gradient(circle at top, #020617, #000000);
-      color: white;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .wrapper { text-align: center; z-index: 2; }
+body {
+  font-family: 'Poppins', sans-serif;
+  background: radial-gradient(circle at top, #020617, #000000);
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
 
-    h1 { font-size: 2.4rem; margin-bottom: 0.5rem; }
-    p { color: #94a3b8; margin-bottom: 2rem; }
+.wrapper { text-align: center; }
 
-    #globeCanvas {
-      width: 300px;
-      height: 300px;
-      margin: 0 auto;
-      cursor: pointer;
-    }
+#globeCanvas, #map {
+  width: 300px;
+  height: 300px;
+  margin: 0 auto;
+}
 
-    .search-box {
-      margin-top: 2rem;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.6s ease;
-      pointer-events: none;
-    }
+#map {
+  display: none;
+  border-radius: 50%;
+  overflow: hidden;
+}
 
-    .search-box.active {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
+.search-box {
+  margin-top: 2rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: 0.6s;
+  pointer-events: none;
+}
 
-    input {
-      width: 280px;
-      padding: 0.8rem 1.2rem;
-      border-radius: 30px;
-      border: none;
-      outline: none;
-      font-size: 1rem;
-    }
+.search-box.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
 
-    .suggestions {
-      margin-top: 0.6rem;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.5rem;
-    }
+input {
+  width: 280px;
+  padding: 0.8rem 1.2rem;
+  border-radius: 30px;
+  border: none;
+  outline: none;
+}
 
-    .suggestions span {
-      background: #1e293b;
-      padding: 0.4rem 0.8rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
+.suggestions {
+  margin-top: 0.6rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
 
-    button {
-      margin-top: 1.2rem;
-      background: #38bdf8;
-      color: #020617;
-      border: none;
-      padding: 0.6rem 1.8rem;
-      border-radius: 30px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
+.suggestions span {
+  background: #1e293b;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
 
-    button:hover { background: #0ea5e9; }
+button {
+  margin-top: 1.2rem;
+  padding: 0.6rem 1.8rem;
+  border-radius: 30px;
+  border: none;
+  background: #38bdf8;
+  cursor: pointer;
+}
 
-    audio { display: none; }
-  </style>
+audio { display: none; }
+</style>
 </head>
+
 <body>
 
-  <div class="wrapper">
-    <h1>Where do you want to go?</h1>
-    <p>Click the globe and start your journey</p>
+<div class="wrapper">
+  <h1>Where do you want to go?</h1>
+  <p>Click the globe to begin</p>
 
-    <div id="globeCanvas"></div>
+  <div id="globeCanvas"></div>
+  <div id="map"></div>
 
-    <div class="search-box" id="searchBox">
-      <input id="destination" placeholder="Search destination..." />
+  <div class="search-box" id="searchBox">
+    <input id="destination" placeholder="Search destination..." />
 
-      <div class="suggestions">
-        <span onclick="pick('goa')">Goa</span>
-        <span onclick="pick('rajasthan')">Rajasthan</span>
-        <span onclick="pick('bali')">Bali</span>
-        <span onclick="pick('paris')">Paris</span>
-        <span onclick="pick('tokyo')">Tokyo</span>
-      </div>
-
-      <button onclick="search()">Show Itinerary</button>
+    <div class="suggestions">
+      <span onclick="pick('goa')">Goa</span>
+      <span onclick="pick('rajasthan')">Rajasthan</span>
+      <span onclick="pick('bali')">Bali</span>
+      <span onclick="pick('paris')">Paris</span>
+      <span onclick="pick('tokyo')">Tokyo</span>
     </div>
+
+    <button onclick="search()">Show Itinerary</button>
   </div>
+</div>
 
-  <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-fast-small-sweep-transition-166.wav"></audio>
+<audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-fast-small-sweep-transition-166.wav"></audio>
 
-  <script>
-    /* ---------- THREE.JS GLOBE ---------- */
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+<script>
+/* ===== THREE.JS GLOBE ===== */
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
 
-    renderer.setSize(300, 300);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    document.getElementById('globeCanvas').appendChild(renderer.domElement);
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  powerPreference: "high-performance"
+});
+renderer.setSize(300, 300);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(0x000000, 1);
 
-    const geometry = new THREE.SphereGeometry(5, 64, 64);
-    const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg');
+document.getElementById("globeCanvas").appendChild(renderer.domElement);
 
-    const material = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.35, metalness: 0.05 });
-    const globe = new THREE.Mesh(geometry, material);
-    scene.add(globe);
+const globe = new THREE.Mesh(
+  new THREE.SphereGeometry(5, 64, 64),
+  new THREE.MeshStandardMaterial({
+    map: new THREE.TextureLoader().load(
+      "https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg"
+    ),
+    roughness: 0.35,
+    metalness: 0.05
+  })
+);
+scene.add(globe);
 
-    const light = new THREE.PointLight(0xffffff, 1.6);
-    light.position.set(10, 10, 10);
-    const ambient = new THREE.AmbientLight(0x404040, 1.4);
-    scene.add(ambient);
-    scene.add(light);
+scene.add(new THREE.AmbientLight(0x404040, 1.4));
 
-    // India glow marker
-    const markerGeo = new THREE.SphereGeometry(0.15, 16, 16);
-    const markerMat = new THREE.MeshBasicMaterial({ color: 0xff9933 });
-    const indiaMarker = new THREE.Mesh(markerGeo, markerMat);
+const light = new THREE.PointLight(0xffffff, 1.6);
+light.position.set(10, 10, 10);
+scene.add(light);
 
-    // Approx India lat/long
-    const lat = 22.0;
-    const lon = 78.0;
-    const radius = 5;
-    const phi = (90 - lat) * (Math.PI / 180);
-    const theta = (lon + 180) * (Math.PI / 180);
+/* India Marker */
+const marker = new THREE.Mesh(
+  new THREE.SphereGeometry(0.15, 16, 16),
+  new THREE.MeshBasicMaterial({ color: 0xff9933 })
+);
+marker.position.set(1.1, 2.4, -3.8);
+scene.add(marker);
 
-    indiaMarker.position.set(
-      -radius * Math.sin(phi) * Math.cos(theta),
-       radius * Math.cos(phi),
-       radius * Math.sin(phi) * Math.sin(theta)
-    );
+camera.position.z = 15;
 
-    scene.add(indiaMarker);
+let spinning = false;
+let zooming = false;
 
-    camera.position.z = 14;
+function animate() {
+  requestAnimationFrame(animate);
+  if (spinning) globe.rotation.y += 0.004;
+  if (zooming && camera.position.z > 11) camera.position.z -= 0.03;
+  renderer.render(scene, camera);
+}
+animate();
 
-    let spinning = false;
-    let zooming = false;
+/* Interaction */
+document.getElementById("globeCanvas").addEventListener("click", () => {
+  spinning = true;
+  zooming = true;
+  document.getElementById("searchBox").classList.add("active");
+  document.getElementById("spinSound").play();
+});
 
-    function animate() {
-      requestAnimationFrame(animate);
-      if (spinning) globe.rotation.y += 0.004;
-      if (zooming && camera.position.z > 8) camera.position.z -= 0.05;
-      renderer.render(scene, camera);
-    }
-    animate();
+/* Search & Map */
+function pick(place) {
+  document.getElementById("destination").value = place;
+}
 
-    /* ---------- INTERACTION ---------- */
-    document.getElementById('globeCanvas').addEventListener('click', () => {
-      spinning = true;
-      zooming = true;
-      document.getElementById('searchBox').classList.add('active');
-      document.getElementById('spinSound').play();
-    });
-      document.getElementById('spinSound').play();
-    });
+function search() {
+  const val = destination.value.toLowerCase().trim();
+  if (!val) return alert("Enter destination");
 
-    function pick(place) {
-      document.getElementById('destination').value = place;
-    }
+  globeCanvas.style.display = "none";
+  map.style.display = "block";
 
-    function search() {
-      const val = document.getElementById('destination').value.trim().toLowerCase();
-      if (!val) return alert('Enter destination');
-      window.location.href = `itineraries/${val}.html`;
-    }
-  </script>
+  const locations = {
+    goa: [15.2993, 74.124],
+    rajasthan: [27.0238, 74.2179],
+    bali: [-8.3405, 115.092],
+    paris: [48.8566, 2.3522],
+    tokyo: [35.6762, 139.6503]
+  };
+
+  const coords = locations[val];
+  if (!coords) return alert("Location not mapped yet");
+
+  const leafletMap = L.map("map").setView(coords, 6);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(leafletMap);
+  L.marker(coords).addTo(leafletMap).bindPopup(val.toUpperCase()).openPopup();
+}
+</script>
 
 </body>
 </html>
