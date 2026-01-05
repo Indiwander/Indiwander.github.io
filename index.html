@@ -1,75 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Welcome to IndiWander-World Travel Itineraries</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #0f172a;
-            color: white;
-            line-height: 1.6;
-        }
-        header {
-            background: #020617;
-            padding: 30px;
-            text-align: center;
-        }
-        section {
-            padding: 40px;
-            max-width: 900px;
-            margin: auto;
-        }
-        h1, h2 {
-            color: #38bdf8;
-        }
-        .card {
-            background: #020617;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 10px;
-        }
-        footer {
-            background: #020617;
-            text-align: center;
-            padding: 20px;
-            opacity: 0.7;
-        }
-        a {
-            color: #38bdf8;
-            text-decoration: none;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IndiWander | Explore the World</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at top, #020617, #000000);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .wrapper { text-align: center; z-index: 2; }
+
+    h1 { font-size: 2.4rem; margin-bottom: 0.5rem; }
+    p { color: #94a3b8; margin-bottom: 2rem; }
+
+    #globeCanvas {
+      width: 300px;
+      height: 300px;
+      margin: 0 auto;
+      cursor: pointer;
+    }
+
+    .search-box {
+      margin-top: 2rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s ease;
+      pointer-events: none;
+    }
+
+    .search-box.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    input {
+      width: 280px;
+      padding: 0.8rem 1.2rem;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+    }
+
+    .suggestions {
+      margin-top: 0.6rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .suggestions span {
+      background: #1e293b;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    button {
+      margin-top: 1.2rem;
+      background: #38bdf8;
+      color: #020617;
+      border: none;
+      padding: 0.6rem 1.8rem;
+      border-radius: 30px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover { background: #0ea5e9; }
+
+    audio { display: none; }
+  </style>
 </head>
 <body>
 
-<header>
-    <h1>Welcome to Indiwander-World Travel Itineraries</h1>
-    <p>Curated travel plans for the world’s most iconic destinations</p>
-</header>
+  <div class="wrapper">
+    <h1>Where do you want to go?</h1>
+    <p>Click the globe and start your journey</p>
 
-<section>
-    <h2>Featured Itineraries</h2>
+    <div id="globeCanvas"></div>
 
-    <div class="card">
-        <h3>3 Days in Paris</h3>
-        <p>Eiffel Tower, Louvre, Montmartre & cafés</p>
-        <a href="#">Read itinerary →</a>
+    <div class="search-box" id="searchBox">
+      <input id="destination" placeholder="Search destination..." />
+
+      <div class="suggestions">
+        <span onclick="pick('goa')">Goa</span>
+        <span onclick="pick('rajasthan')">Rajasthan</span>
+        <span onclick="pick('bali')">Bali</span>
+        <span onclick="pick('paris')">Paris</span>
+        <span onclick="pick('tokyo')">Tokyo</span>
+      </div>
+
+      <button onclick="search()">Show Itinerary</button>
     </div>
+  </div>
 
-    <div class="card">
-        <h3>5 Days in Bali</h3>
-        <p>Beaches, temples, waterfalls & culture</p>
-        <a href="#">Read itinerary →</a>
-    </div>
+  <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-fast-small-sweep-transition-166.wav"></audio>
 
-</section>
+  <script>
+    /* ---------- THREE.JS GLOBE ---------- */
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 
-<footer>
-    © 2026 World Travel Itineraries
-</footer>
+    renderer.setSize(300, 300);
+    document.getElementById('globeCanvas').appendChild(renderer.domElement);
+
+    const geometry = new THREE.SphereGeometry(5, 64, 64);
+    const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg');
+
+    const material = new THREE.MeshStandardMaterial({ map: texture });
+    const globe = new THREE.Mesh(geometry, material);
+    scene.add(globe);
+
+    const light = new THREE.PointLight(0x38bdf8, 2);
+    light.position.set(10, 10, 10);
+    scene.add(light);
+
+    camera.position.z = 12;
+
+    let spinning = false;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (spinning) globe.rotation.y += 0.01;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    /* ---------- INTERACTION ---------- */
+    document.getElementById('globeCanvas').addEventListener('click', () => {
+      spinning = true;
+      document.getElementById('searchBox').classList.add('active');
+      document.getElementById('spinSound').play();
+    });
+
+    function pick(place) {
+      document.getElementById('destination').value = place;
+    }
+
+    function search() {
+      const val = document.getElementById('destination').value.trim().toLowerCase();
+      if (!val) return alert('Enter destination');
+      window.location.href = `itineraries/${val}.html`;
+    }
+  </script>
 
 </body>
 </html>
