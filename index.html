@@ -1,103 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>IndiWander | Explore the World</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IndiWander | Explore the World</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at top, #020617, #000000);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
 
-body {
-  font-family: 'Poppins', sans-serif;
-  background: radial-gradient(circle at top, #020617, #000000);
-  color: white;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
+    .wrapper { text-align: center; z-index: 2; }
 
-.wrapper { text-align: center; }
+    h1 { font-size: 2.4rem; margin-bottom: 0.5rem; }
+    p { color: #94a3b8; margin-bottom: 2rem; }
 
-#globeCanvas, #map {
-  width: 300px;
-  height: 300px;
-  margin: 0 auto;
-}
+    #globeCanvas {
+      width: 320px;
+      height: 320px;
+      margin: 0 auto;
+      cursor: pointer;
+    }
 
-#map {
-  display: none;
-  border-radius: 50%;
-  overflow: hidden;
-}
+    #mapWrapper {
+      width: 360px;
+      height: 360px;
+      margin: 0 auto;
+      border-radius: 50%;
+      display: none;
+      position: relative;
+      overflow: visible;
+      box-shadow: 0 0 60px rgba(56,189,248,0.35);
+    }
 
-.search-box {
-  margin-top: 2rem;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: 0.6s;
-  pointer-events: none;
-}
+    #map {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+    }
 
-.search-box.active {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
+    .leaflet-container {
+      background: #000;
+      border-radius: 50%;
+    }
 
-input {
-  width: 280px;
-  padding: 0.8rem 1.2rem;
-  border-radius: 30px;
-  border: none;
-  outline: none;
-}
+    .leaflet-control-container { display: none; }
 
-.suggestions {
-  margin-top: 0.6rem;
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
+    .search-box {
+      margin-top: 2rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s ease;
+      pointer-events: none;
+    }
 
-.suggestions span {
-  background: #1e293b;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.8rem;
-}
+    .search-box.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
 
-button {
-  margin-top: 1.2rem;
-  padding: 0.6rem 1.8rem;
-  border-radius: 30px;
-  border: none;
-  background: #38bdf8;
-  cursor: pointer;
-}
+    input {
+      width: 280px;
+      padding: 0.8rem 1.2rem;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+    }
 
-audio { display: none; }
-</style>
+    .suggestions {
+      margin-top: 0.6rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .suggestions span {
+      background: #1e293b;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    button {
+      margin-top: 1.2rem;
+      background: #38bdf8;
+      color: #020617;
+      border: none;
+      padding: 0.6rem 1.8rem;
+      border-radius: 30px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover { background: #0ea5e9; }
+
+    audio { display: none; }
+  </style>
 </head>
-
 <body>
 
 <div class="wrapper">
   <h1>Where do you want to go?</h1>
-  <p>Click the globe to begin</p>
+  <p>Click the globe and start your journey</p>
 
   <div id="globeCanvas"></div>
-  <div id="map"></div>
+
+  <div id="mapWrapper">
+    <div id="map"></div>
+  </div>
 
   <div class="search-box" id="searchBox">
     <input id="destination" placeholder="Search destination..." />
@@ -117,45 +146,27 @@ audio { display: none; }
 <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-fast-small-sweep-transition-166.wav"></audio>
 
 <script>
-/* ===== THREE.JS GLOBE ===== */
+/* ---------- THREE.JS GLOBE ---------- */
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 
-const renderer = new THREE.WebGLRenderer({
-  antialias: true,
-  powerPreference: "high-performance"
-});
-renderer.setSize(300, 300);
+renderer.setSize(320, 320);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor(0x000000, 1);
+document.getElementById('globeCanvas').appendChild(renderer.domElement);
 
-document.getElementById("globeCanvas").appendChild(renderer.domElement);
+const geometry = new THREE.SphereGeometry(5, 64, 64);
+const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg');
 
-const globe = new THREE.Mesh(
-  new THREE.SphereGeometry(5, 64, 64),
-  new THREE.MeshStandardMaterial({
-    map: new THREE.TextureLoader().load(
-      "https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg"
-    ),
-    roughness: 0.35,
-    metalness: 0.05
-  })
-);
+const material = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.35, metalness: 0.05 });
+const globe = new THREE.Mesh(geometry, material);
 scene.add(globe);
-
-scene.add(new THREE.AmbientLight(0x404040, 1.4));
 
 const light = new THREE.PointLight(0xffffff, 1.6);
 light.position.set(10, 10, 10);
+scene.add(new THREE.AmbientLight(0x404040, 1.4));
 scene.add(light);
-
-/* India Marker */
-const marker = new THREE.Mesh(
-  new THREE.SphereGeometry(0.15, 16, 16),
-  new THREE.MeshBasicMaterial({ color: 0xff9933 })
-);
-marker.position.set(1.1, 2.4, -3.8);
-scene.add(marker);
 
 camera.position.z = 15;
 
@@ -165,45 +176,53 @@ let zooming = false;
 function animate() {
   requestAnimationFrame(animate);
   if (spinning) globe.rotation.y += 0.004;
-  if (zooming && camera.position.z > 11) camera.position.z -= 0.03;
+  if (zooming && camera.position.z > 10) camera.position.z -= 0.03;
   renderer.render(scene, camera);
 }
 animate();
 
-/* Interaction */
-document.getElementById("globeCanvas").addEventListener("click", () => {
+/* ---------- INTERACTION ---------- */
+document.getElementById('globeCanvas').addEventListener('click', () => {
   spinning = true;
   zooming = true;
-  document.getElementById("searchBox").classList.add("active");
-  document.getElementById("spinSound").play();
+  document.getElementById('searchBox').classList.add('active');
+  document.getElementById('spinSound').play();
 });
 
-/* Search & Map */
 function pick(place) {
-  document.getElementById("destination").value = place;
+  document.getElementById('destination').value = place;
 }
 
 function search() {
-  const val = destination.value.toLowerCase().trim();
-  if (!val) return alert("Enter destination");
+  const val = document.getElementById('destination').value.trim().toLowerCase();
+  if (!val) return alert('Enter destination');
 
-  globeCanvas.style.display = "none";
-  map.style.display = "block";
+  document.getElementById('globeCanvas').style.display = 'none';
+  document.getElementById('mapWrapper').style.display = 'block';
 
   const locations = {
-    goa: [15.2993, 74.124],
+    goa: [15.2993, 74.1240],
     rajasthan: [27.0238, 74.2179],
-    bali: [-8.3405, 115.092],
+    bali: [-8.3405, 115.0920],
     paris: [48.8566, 2.3522],
     tokyo: [35.6762, 139.6503]
   };
 
   const coords = locations[val];
-  if (!coords) return alert("Location not mapped yet");
+  if (!coords) return alert('Location not mapped yet');
 
-  const leafletMap = L.map("map").setView(coords, 6);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(leafletMap);
-  L.marker(coords).addTo(leafletMap).bindPopup(val.toUpperCase()).openPopup();
+  const map = L.map('map', {
+    zoomControl: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    dragging: true,
+    attributionControl: false
+  }).setView(coords, 5);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  L.marker(coords).addTo(map).bindPopup(val.toUpperCase()).openPopup();
+
+  setTimeout(() => map.invalidateSize(), 300);
 }
 </script>
 
