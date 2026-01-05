@@ -6,21 +6,7 @@
   <title>IndiWander | Explore the World</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/three@0.158.0/build/three.min.js">/* ===== BACK TO GLOBE ===== */
-document.getElementById('backBtn').addEventListener('click', () => {
-  document.getElementById('mapWrapper').style.display = 'none';
-  document.getElementById('backBtn').style.display = 'none';
-  document.getElementById('globeContainer').style.display = 'block';
-  renderer.setSize(360, 360);
-  camera.aspect = 1;
-  camera.updateProjectionMatrix();
-
-  camera.position.z = 16;
-  spinning = false;
-  zooming = false;
-});
-
-</script>
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -43,7 +29,6 @@ document.getElementById('backBtn').addEventListener('click', () => {
     h1 { font-size: 2.4rem; margin-bottom: 0.5rem; }
     p { color: #94a3b8; margin-bottom: 2rem; }
 
-    /* ===== TRUE FLOATING GLOBE ===== */
     #globeContainer {
       width: 360px;
       height: 360px;
@@ -55,23 +40,12 @@ document.getElementById('backBtn').addEventListener('click', () => {
       display: block;
     }
 
-    #globeContainer::before {
-      content: '';
-      position: absolute;
-      inset: -25px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(56,189,248,0.35), transparent 70%);
-      filter: blur(25px);
-      z-index: 0;
-    }
-
     #globeCanvas canvas {
       display: block;
       border-radius: 50%;
       background: transparent;
     }
 
-    /* ===== MAP PLANET ===== */
     #mapWrapper {
       width: 360px;
       height: 360px;
@@ -84,11 +58,7 @@ document.getElementById('backBtn').addEventListener('click', () => {
     }
 
     #map { width: 100%; height: 100%; }
-
-    .leaflet-container {
-      background: #000;
-    }
-
+    .leaflet-container { background: #000; }
     .leaflet-control-container { display: none; }
 
     .search-box {
@@ -142,6 +112,16 @@ document.getElementById('backBtn').addEventListener('click', () => {
     }
 
     button:hover { background: #0ea5e9; }
+    #backBtn {
+      display: none;
+      margin-bottom: 1rem;
+      background:#1e293b;
+      color:#fff;
+      border:none;
+      padding:0.5rem 1.4rem;
+      border-radius:999px;
+      cursor:pointer;
+    }
 
     audio { display: none; }
   </style>
@@ -156,7 +136,7 @@ document.getElementById('backBtn').addEventListener('click', () => {
     <div id="globeCanvas"></div>
   </div>
 
-  <button id="backBtn" style="display:none;margin-bottom:1rem;background:#1e293b;color:#fff;border:none;padding:0.5rem 1.4rem;border-radius:999px;cursor:pointer;">← Back to Globe</button>
+  <button id="backBtn">← Back to Globe</button>
 
   <div id="mapWrapper">
     <div id="map"></div>
@@ -164,7 +144,6 @@ document.getElementById('backBtn').addEventListener('click', () => {
 
   <div class="search-box" id="searchBox">
     <input id="destination" placeholder="Search destination..." />
-
     <div class="suggestions">
       <span onclick="pick('goa')">Goa</span>
       <span onclick="pick('rajasthan')">Rajasthan</span>
@@ -172,7 +151,6 @@ document.getElementById('backBtn').addEventListener('click', () => {
       <span onclick="pick('paris')">Paris</span>
       <span onclick="pick('tokyo')">Tokyo</span>
     </div>
-
     <button onclick="search()">Show Itinerary</button>
   </div>
 </div>
@@ -180,37 +158,26 @@ document.getElementById('backBtn').addEventListener('click', () => {
 <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-fast-small-sweep-transition-166.wav"></audio>
 
 <script>
-/* ===== THREE.JS TRUE SPHERE ===== */
+const globeCanvasContainer = document.getElementById('globeCanvas');
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
 renderer.setSize(360, 360);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x000000, 0);
-
-document.getElementById('globeCanvas').appendChild(renderer.domElement);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setClearColor(0x000000,0);
+globeCanvasContainer.appendChild(renderer.domElement);
 
 const geometry = new THREE.SphereGeometry(5, 96, 96);
 const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg');
-
-const material = new THREE.MeshPhysicalMaterial({
-  map: texture,
-  roughness: 0.25,
-  metalness: 0.0,
-  clearcoat: 0.4,
-  clearcoatRoughness: 0.2
-});
-
+const material = new THREE.MeshPhysicalMaterial({ map:texture, roughness:0.25, metalness:0.0, clearcoat:0.4, clearcoatRoughness:0.2 });
 const globe = new THREE.Mesh(geometry, material);
 scene.add(globe);
-
-scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-const sun = new THREE.DirectionalLight(0xffffff, 1.4);
-sun.position.set(10, 10, 10);
+scene.add(new THREE.AmbientLight(0xffffff,0.6));
+const sun = new THREE.DirectionalLight(0xffffff,1.4);
+sun.position.set(10,10,10);
 scene.add(sun);
 
-/* ===== DESTINATION LIGHTS ===== */
+// Destination lights
 const destinations = [
   { name: 'India', lat: 20.6, lon: 78.9 },
   { name: 'France', lat: 46.2, lon: 2.2 },
@@ -219,129 +186,48 @@ const destinations = [
   { name: 'Italy', lat: 41.9, lon: 12.6 },
   { name: 'USA', lat: 39.8, lon: -98.6 }
 ];
-
 const lightGroup = new THREE.Group();
-const lightMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700 });
-
-function latLngToVector3(lat, lon, radius) {
-  const phi = (90 - lat) * (Math.PI / 180);
-  const theta = (lon + 180) * (Math.PI / 180);
-  return new THREE.Vector3(
-    -radius * Math.sin(phi) * Math.cos(theta),
-     radius * Math.cos(phi),
-     radius * Math.sin(phi) * Math.sin(theta)
-  );
-}
-
-destinations.forEach(dest => {
-  const markerGeo = new THREE.SphereGeometry(0.12, 16, 16);
-  const marker = new THREE.Mesh(markerGeo, lightMaterial.clone());
-  marker.position.copy(latLngToVector3(dest.lat, dest.lon, 5.05));
-  marker.userData = dest;
-  lightGroup.add(marker);
-});
-
+const lightMaterial = new THREE.MeshBasicMaterial({ color:0xffd700 });
+function latLngToVector3(lat,lon,radius){const phi=(90-lat)*(Math.PI/180);const theta=(lon+180)*(Math.PI/180);return new THREE.Vector3(-radius*Math.sin(phi)*Math.cos(theta),radius*Math.cos(phi),radius*Math.sin(phi)*Math.sin(theta));}
+destinations.forEach(dest=>{const markerGeo=new THREE.SphereGeometry(0.12,16,16);const marker=new THREE.Mesh(markerGeo,lightMaterial.clone());marker.position.copy(latLngToVector3(dest.lat,dest.lon,5.05));marker.userData=dest;lightGroup.add(marker);});
 scene.add(lightGroup);
 
-camera.position.z = 16;
+let spinning=false, zooming=false, hoveredMarker=null;
+const raycaster=new THREE.Raycaster();
+const mouse=new THREE.Vector2();
 
-let spinning = false;
-let zooming = false;
-let hoveredMarker = null;
+function animate(){requestAnimationFrame(animate);globe.rotation.y+=spinning?0.004:0.001;if(zooming&&camera.position.z>11)camera.position.z-=0.035;renderer.render(scene,camera);}animate();
 
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-let zooming = false;
+// Globe click to rotate & show search
+document.getElementById('globeContainer').addEventListener('click',()=>{spinning=true;zooming=true;document.getElementById('searchBox').classList.add('active');document.getElementById('spinSound').play();});
 
-function animate() {
-  requestAnimationFrame(animate);
-  globe.rotation.y += spinning ? 0.004 : 0.001;
+// Hover detection
+renderer.domElement.addEventListener('mousemove',e=>{const rect=renderer.domElement.getBoundingClientRect();mouse.x=((e.clientX-rect.left)/rect.width)*2-1;mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(mouse,camera);const intersects=raycaster.intersectObjects(lightGroup.children);if(intersects.length>0){const obj=intersects[0].object;if(hoveredMarker!==obj){if(hoveredMarker)hoveredMarker.scale.set(1,1,1);hoveredMarker=obj;hoveredMarker.scale.set(1.8,1.8,1.8);document.body.style.cursor='pointer';}}else{if(hoveredMarker)hoveredMarker.scale.set(1,1,1);hoveredMarker=null;document.body.style.cursor='default';}});
 
-  if (zooming && camera.position.z > 11) {
-    camera.position.z -= 0.035;
-  }
+renderer.domElement.addEventListener('click',()=>{if(!hoveredMarker)return;const country=hoveredMarker.userData.name;document.getElementById('destination').value=country.toLowerCase();document.getElementById('searchBox').classList.add('active');});
 
-  renderer.render(scene, camera);
-}
-animate();
+function pick(place){document.getElementById('destination').value=place;}
 
-/* ===== HOVER & CLICK DETECTION ===== */
-renderer.domElement.addEventListener('mousemove', (e) => {
-  const rect = renderer.domElement.getBoundingClientRect();
-  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+function search(){const val=document.getElementById('destination').value.trim().toLowerCase();if(!val)return alert('Enter destination');document.getElementById('globeContainer').style.display='none';document.getElementById('mapWrapper').style.display='block';
+const locations={goa:[15.2993,74.124],rajasthan:[27.0238,74.2179],bali:[-8.3405,115.092],paris:[48.8566,2.3522],tokyo:[35.6762,139.6503]};
+const coords=locations[val];if(!coords)return alert('Location not mapped yet');
+const map=L.map('map',{zoomControl:false,scrollWheelZoom:false,doubleClickZoom:false,dragging:true,attributionControl:false}).setView(coords,5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+L.marker(coords).addTo(map).bindPopup(val.toUpperCase()).openPopup();
+setTimeout(()=>map.invalidateSize(),300);
+document.getElementById('backBtn').style.display='inline-block';}
 
-  raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(lightGroup.children);
-
-  if (intersects.length > 0) {
-    const obj = intersects[0].object;
-    if (hoveredMarker !== obj) {
-      if (hoveredMarker) hoveredMarker.scale.set(1, 1, 1);
-      hoveredMarker = obj;
-      hoveredMarker.scale.set(1.8, 1.8, 1.8);
-      document.body.style.cursor = 'pointer';
-    }
-  } else {
-    if (hoveredMarker) hoveredMarker.scale.set(1, 1, 1);
-    hoveredMarker = null;
-    document.body.style.cursor = 'default';
-  }
+// Back to globe
+document.getElementById('backBtn').addEventListener('click',()=>{
+document.getElementById('mapWrapper').style.display='none';
+document.getElementById('backBtn').style.display='none';
+document.getElementById('globeContainer').style.display='block';
+renderer.setSize(globeCanvasContainer.clientWidth,globeCanvasContainer.clientHeight);
+camera.aspect=globeCanvasContainer.clientWidth/globeCanvasContainer.clientHeight;
+camera.updateProjectionMatrix();
+spinning=false;
+zooming=false;
 });
-
-renderer.domElement.addEventListener('click', () => {
-  if (!hoveredMarker) return;
-  const country = hoveredMarker.userData.name;
-  document.getElementById('destination').value = country.toLowerCase();
-  document.getElementById('searchBox').classList.add('active');
-});
-
-/* ===== INTERACTION ===== */
-document.getElementById('globeContainer').addEventListener('click', () => {
-  spinning = true;
-  zooming = true;
-  document.getElementById('searchBox').classList.add('active');
-  document.getElementById('spinSound').play();
-});
-
-function pick(place) {
-  document.getElementById('destination').value = place;
-}
-
-function search() {
-  spinning = false;
-  zooming = false;
-  const val = document.getElementById('destination').value.trim().toLowerCase();
-  if (!val) return alert('Enter destination');
-
-  document.getElementById('globeContainer').style.display = 'none';
-  document.getElementById('mapWrapper').style.display = 'block';
-
-  const locations = {
-    goa: [15.2993, 74.1240],
-    rajasthan: [27.0238, 74.2179],
-    bali: [-8.3405, 115.0920],
-    paris: [48.8566, 2.3522],
-    tokyo: [35.6762, 139.6503]
-  };
-
-  const coords = locations[val];
-  if (!coords) return alert('Location not mapped yet');
-
-  const map = L.map('map', {
-    zoomControl: false,
-    scrollWheelZoom: false,
-    doubleClickZoom: false,
-    dragging: true,
-    attributionControl: false
-  }).setView(coords, 5);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-  L.marker(coords).addTo(map).bindPopup(val.toUpperCase()).openPopup();
-
-  setTimeout(() => map.invalidateSize(), 300);
-  document.getElementById('backBtn').style.display = 'inline-block';
-}
 </script>
 
 </body>
