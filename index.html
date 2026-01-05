@@ -137,13 +137,35 @@
     scene.add(ambient);
     scene.add(light);
 
+    // India glow marker
+    const markerGeo = new THREE.SphereGeometry(0.15, 16, 16);
+    const markerMat = new THREE.MeshBasicMaterial({ color: 0xff9933 });
+    const indiaMarker = new THREE.Mesh(markerGeo, markerMat);
+
+    // Approx India lat/long
+    const lat = 22.0;
+    const lon = 78.0;
+    const radius = 5;
+    const phi = (90 - lat) * (Math.PI / 180);
+    const theta = (lon + 180) * (Math.PI / 180);
+
+    indiaMarker.position.set(
+      -radius * Math.sin(phi) * Math.cos(theta),
+       radius * Math.cos(phi),
+       radius * Math.sin(phi) * Math.sin(theta)
+    );
+
+    scene.add(indiaMarker);
+
     camera.position.z = 14;
 
     let spinning = false;
+    let zooming = false;
 
     function animate() {
       requestAnimationFrame(animate);
-      if (spinning) globe.rotation.y += 0.006;
+      if (spinning) globe.rotation.y += 0.004;
+      if (zooming && camera.position.z > 8) camera.position.z -= 0.05;
       renderer.render(scene, camera);
     }
     animate();
@@ -151,7 +173,10 @@
     /* ---------- INTERACTION ---------- */
     document.getElementById('globeCanvas').addEventListener('click', () => {
       spinning = true;
+      zooming = true;
       document.getElementById('searchBox').classList.add('active');
+      document.getElementById('spinSound').play();
+    });
       document.getElementById('spinSound').play();
     });
 
