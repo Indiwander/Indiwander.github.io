@@ -121,26 +121,29 @@
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 
     renderer.setSize(300, 300);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     document.getElementById('globeCanvas').appendChild(renderer.domElement);
 
     const geometry = new THREE.SphereGeometry(5, 64, 64);
     const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg');
 
-    const material = new THREE.MeshStandardMaterial({ map: texture });
+    const material = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.35, metalness: 0.05 });
     const globe = new THREE.Mesh(geometry, material);
     scene.add(globe);
 
-    const light = new THREE.PointLight(0x38bdf8, 2);
+    const light = new THREE.PointLight(0xffffff, 1.6);
     light.position.set(10, 10, 10);
+    const ambient = new THREE.AmbientLight(0x404040, 1.4);
+    scene.add(ambient);
     scene.add(light);
 
-    camera.position.z = 12;
+    camera.position.z = 14;
 
     let spinning = false;
 
     function animate() {
       requestAnimationFrame(animate);
-      if (spinning) globe.rotation.y += 0.01;
+      if (spinning) globe.rotation.y += 0.006;
       renderer.render(scene, camera);
     }
     animate();
