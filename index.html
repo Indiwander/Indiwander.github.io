@@ -6,7 +6,18 @@
   <title>IndiWander | Explore the World</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js">/* ===== BACK TO GLOBE ===== */
+document.getElementById('backBtn').addEventListener('click', () => {
+  document.getElementById('mapWrapper').style.display = 'none';
+  document.getElementById('backBtn').style.display = 'none';
+  document.getElementById('globeContainer').style.display = 'block';
+
+  camera.position.z = 16;
+  spinning = false;
+  zooming = false;
+});
+
+</script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -141,6 +152,8 @@
     <div id="globeCanvas"></div>
   </div>
 
+  <button id="backBtn" style="display:none;margin-bottom:1rem;background:#1e293b;color:#fff;border:none;padding:0.5rem 1.4rem;border-radius:999px;cursor:pointer;">← Back to Globe</button>
+
   <div id="mapWrapper">
     <div id="map"></div>
   </div>
@@ -193,9 +206,47 @@ const sun = new THREE.DirectionalLight(0xffffff, 1.4);
 sun.position.set(10, 10, 10);
 scene.add(sun);
 
+/* ===== DESTINATION LIGHTS ===== */
+const destinations = [
+  { name: 'India', lat: 20.6, lon: 78.9 },
+  { name: 'France', lat: 46.2, lon: 2.2 },
+  { name: 'Japan', lat: 36.2, lon: 138.3 },
+  { name: 'Indonesia', lat: -2.5, lon: 118.0 },
+  { name: 'Italy', lat: 41.9, lon: 12.6 },
+  { name: 'USA', lat: 39.8, lon: -98.6 }
+];
+
+const lightGroup = new THREE.Group();
+const lightMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+
+function latLngToVector3(lat, lon, radius) {
+  const phi = (90 - lat) * (Math.PI / 180);
+  const theta = (lon + 180) * (Math.PI / 180);
+  return new THREE.Vector3(
+    -radius * Math.sin(phi) * Math.cos(theta),
+     radius * Math.cos(phi),
+     radius * Math.sin(phi) * Math.sin(theta)
+  );
+}
+
+destinations.forEach(dest => {
+  const markerGeo = new THREE.SphereGeometry(0.12, 16, 16);
+  const marker = new THREE.Mesh(markerGeo, lightMaterial.clone());
+  marker.position.copy(latLngToVector3(dest.lat, dest.lon, 5.05));
+  marker.userData = dest;
+  lightGroup.add(marker);
+});
+
+scene.add(lightGroup);
+
 camera.position.z = 16;
 
 let spinning = false;
+let zooming = false;
+let hoveredMarker = null;
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 let zooming = false;
 
 function animate() {
@@ -210,6 +261,37 @@ function animate() {
 }
 animate();
 
+/* ===== HOVER & CLICK DETECTION ===== */
+renderer.domElement.addEventListener('mousemove', (e) => {
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(lightGroup.children);
+
+  if (intersects.length > 0) {
+    const obj = intersects[0].object;
+    if (hoveredMarker !== obj) {
+      if (hoveredMarker) hoveredMarker.scale.set(1, 1, 1);
+      hoveredMarker = obj;
+      hoveredMarker.scale.set(1.8, 1.8, 1.8);
+      document.body.style.cursor = 'pointer';
+    }
+  } else {
+    if (hoveredMarker) hoveredMarker.scale.set(1, 1, 1);
+    hoveredMarker = null;
+    document.body.style.cursor = 'default';
+  }
+});
+
+renderer.domElement.addEventListener('click', () => {
+  if (!hoveredMarker) return;
+  const country = hoveredMarker.userData.name;
+  document.getElementById('destination').value = country.toLowerCase();
+  document.getElementById('searchBox').classList.add('active');
+});
+
 /* ===== INTERACTION ===== */
 document.getElementById('globeContainer').addEventListener('click', () => {
   spinning = true;
@@ -223,6 +305,8 @@ function pick(place) {
 }
 
 function search() {
+  spinning = false;
+  zooming = false;
   const val = document.getElementById('destination').value.trim().toLowerCase();
   if (!val) return alert('Enter destination');
 
@@ -252,6 +336,7 @@ function search() {
   L.marker(coords).addTo(map).bindPopup(val.toUpperCase()).openPopup();
 
   setTimeout(() => map.invalidateSize(), 300);
+  document.getElementById('backBtn').style.display = 'inline-block';
 }
 </script>
 
