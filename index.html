@@ -11,6 +11,9 @@ document.getElementById('backBtn').addEventListener('click', () => {
   document.getElementById('mapWrapper').style.display = 'none';
   document.getElementById('backBtn').style.display = 'none';
   document.getElementById('globeContainer').style.display = 'block';
+  renderer.setSize(360, 360);
+  camera.aspect = 1;
+  camera.updateProjectionMatrix();
 
   camera.position.z = 16;
   spinning = false;
@@ -49,6 +52,7 @@ document.getElementById('backBtn').addEventListener('click', () => {
       overflow: visible;
       position: relative;
       pointer-events: auto;
+      display: block;
     }
 
     #globeContainer::before {
@@ -180,7 +184,7 @@ document.getElementById('backBtn').addEventListener('click', () => {
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
 renderer.setSize(360, 360);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor(0x000000, 0);
