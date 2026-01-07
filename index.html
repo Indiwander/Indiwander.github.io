@@ -24,8 +24,6 @@
   .suggestions span{background:#1e293b;padding:0.4rem 0.8rem;border-radius:20px;font-size:0.8rem;cursor:pointer;}
   button{margin-top:1.2rem;background:#38bdf8;color:#020617;border:none;padding:0.6rem 1.8rem;border-radius:30px;font-size:1rem;cursor:pointer;}
   button:hover{background:#0ea5e9;}
-  .back-btn{display:inline-block;margin-top:2rem;background:#38bdf8;color:#020617;border-radius:30px;padding:0.7rem 1.6rem;text-decoration:none;font-weight:600;transition:background 0.3s ease;}
-  .back-btn:hover{background:#0ea5e9;}
 </style>
 </head>
 
@@ -51,25 +49,24 @@
 </div>
 
 <script>
-  // ---------- HELPER: Pick location ----------
+  // ---------- PICK LOCATION ----------
   function pick(place){ document.getElementById('destination').value = place; }
 
   // ---------- SEARCH ----------
   function search(){
     const val = document.getElementById('destination').value.trim().toLowerCase();
     if(!val) return alert('Enter destination');
-    window.location.href = `itineraries/${val}.html?location=${val}`;
+    window.location.href = `itineraries/${val}.html?map=${val}`;
   }
 
-  // ---------- CHECK URL PARAM ----------
+  // ---------- URL PARAM CHECK ----------
   const params = new URLSearchParams(window.location.search);
-  const loc = params.get('location');
+  const mapLoc = params.get('map'); // only trigger map if ?map=<location> exists
 
   const globeCanvas = document.getElementById('globeCanvas');
   const mapDiv = document.getElementById('map');
 
-  if(loc){
-    // Show map instead of globe
+  if(mapLoc){
     globeCanvas.style.display = 'none';
     mapDiv.style.display = 'block';
 
@@ -81,50 +78,52 @@
       varanasi:[25.3176,82.9739]
     };
 
-    const coords = locations[loc];
+    const coords = locations[mapLoc];
     if(!coords) return alert('Location not mapped yet');
 
     const map = L.map('map').setView(coords,6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
-    L.marker(coords).addTo(map).bindPopup(loc.toUpperCase()).openPopup();
+    L.marker(coords).addTo(map).bindPopup(mapLoc.toUpperCase()).openPopup();
 
-    return; // exit, no globe
+  }else{
+    // ---------- THREE.JS GLOBE ----------
+    globeCanvas.style.display='block';
+    mapDiv.style.display='none';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45,1,0.1,1000);
+    const renderer = new THREE.WebGLRenderer({alpha:true,antialias:true});
+    renderer.setSize(350,350);
+    document.getElementById('globeCanvas').appendChild(renderer.domElement);
+
+    const geometry = new THREE.SphereGeometry(5,64,64);
+    const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg');
+    const material = new THREE.MeshStandardMaterial({map:texture,roughness:0.35,metalness:0.05});
+    const globe = new THREE.Mesh(geometry,material);
+    scene.add(globe);
+
+    const light = new THREE.PointLight(0xffffff,1.6);
+    light.position.set(10,10,10);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0x404040,1.4));
+
+    camera.position.z=14;
+
+    let spinning=false,zooming=false;
+    function animate(){
+      requestAnimationFrame(animate);
+      if(spinning) globe.rotation.y+=0.004;
+      if(zooming && camera.position.z>8) camera.position.z-=0.05;
+      renderer.render(scene,camera);
+    }
+    animate();
+
+    globeCanvas.addEventListener('click',()=>{
+      spinning=true;
+      zooming=true;
+      document.getElementById('searchBox').classList.add('active');
+    });
   }
-
-  // ---------- THREE.JS GLOBE ----------
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45,1,0.1,1000);
-  const renderer = new THREE.WebGLRenderer({alpha:true,antialias:true});
-  renderer.setSize(350,350);
-  document.getElementById('globeCanvas').appendChild(renderer.domElement);
-
-  const geometry = new THREE.SphereGeometry(5,64,64);
-  const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg');
-  const material = new THREE.MeshStandardMaterial({map:texture,roughness:0.35,metalness:0.05});
-  const globe = new THREE.Mesh(geometry,material);
-  scene.add(globe);
-
-  const light = new THREE.PointLight(0xffffff,1.6);
-  light.position.set(10,10,10);
-  scene.add(light);
-  scene.add(new THREE.AmbientLight(0x404040,1.4));
-
-  camera.position.z=14;
-
-  let spinning=false,zooming=false;
-  function animate(){
-    requestAnimationFrame(animate);
-    if(spinning) globe.rotation.y+=0.004;
-    if(zooming && camera.position.z>8) camera.position.z-=0.05;
-    renderer.render(scene,camera);
-  }
-  animate();
-
-  globeCanvas.addEventListener('click',()=>{
-    spinning=true;
-    zooming=true;
-    document.getElementById('searchBox').classList.add('active');
-  });
 </script>
 </body>
 </html>
