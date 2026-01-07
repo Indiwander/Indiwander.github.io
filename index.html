@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>IndiWander | Explore the World</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600,700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -49,25 +49,28 @@
 </div>
 
 <script>
-  // -------- PICK FUNCTION --------
-  function pick(place){ document.getElementById('destination').value = place; }
+document.addEventListener('DOMContentLoaded', function() {
 
-  // -------- SEARCH FUNCTION --------
+  // ---------- PICK & SEARCH ----------
+  function pick(place){ document.getElementById('destination').value = place; }
+  window.pick = pick;
+
   function search(){
     const val = document.getElementById('destination').value.trim().toLowerCase();
     if(!val) return alert('Enter destination');
     window.location.href = `itineraries/${val}.html?map=${val}`;
   }
+  window.search = search;
 
-  // -------- URL PARAM CHECK --------
+  // ---------- URL PARAM ----------
   const params = new URLSearchParams(window.location.search);
   const mapLoc = params.get('map');
 
   const globeCanvas = document.getElementById('globeCanvas');
   const mapDiv = document.getElementById('map');
 
+  // ---------- SHOW MAP IF ?map EXISTS ----------
   if(mapLoc){
-    // Show map if ?map parameter exists
     globeCanvas.style.display='none';
     mapDiv.style.display='block';
 
@@ -78,6 +81,7 @@
       himachal:[31.1048,77.1734],
       varanasi:[25.3176,82.9739]
     };
+
     const coords = locations[mapLoc];
     if(!coords) return alert('Location not mapped yet');
 
@@ -88,15 +92,16 @@
     L.marker(coords).addTo(map).bindPopup(mapLoc.toUpperCase()).openPopup();
 
   }else{
-    // -------- SHOW GLOBE --------
+    // ---------- SHOW GLOBE ----------
     globeCanvas.style.display='block';
     mapDiv.style.display='none';
+    globeCanvas.innerHTML='';
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45,1,0.1,1000);
     const renderer = new THREE.WebGLRenderer({alpha:true,antialias:true});
     renderer.setSize(350,350);
-    document.getElementById('globeCanvas').appendChild(renderer.domElement);
+    globeCanvas.appendChild(renderer.domElement);
 
     const geometry = new THREE.SphereGeometry(5,64,64);
     const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg');
@@ -109,9 +114,32 @@
     scene.add(light);
     scene.add(new THREE.AmbientLight(0x404040,1.4));
 
-    camera.position.z=14;
+    // ---------- Major Destinations Markers ----------
+    const markerGeo = new THREE.SphereGeometry(0.15,16,16);
+    const markerMat = new THREE.MeshBasicMaterial({color:0xffcc00});
+    const destinations = {
+      goa:[15.2993,74.1240],
+      rajasthan:[27.0238,74.2179],
+      kerala:[10.8505,76.2711],
+      himachal:[31.1048,77.1734],
+      varanasi:[25.3176,82.9739]
+    };
+    for(let loc in destinations){
+      const [lat, lon] = destinations[loc];
+      const marker = new THREE.Mesh(markerGeo, markerMat);
+      const phi = (90-lat)*(Math.PI/180);
+      const theta = (lon+180)*(Math.PI/180);
+      const radius = 5;
+      marker.position.set(
+        -radius * Math.sin(phi) * Math.cos(theta),
+        radius * Math.cos(phi),
+        radius * Math.sin(phi) * Math.sin(theta)
+      );
+      scene.add(marker);
+    }
 
-    let spinning=false,zooming=false;
+    camera.position.z = 14;
+    let spinning=false, zooming=false;
     function animate(){
       requestAnimationFrame(animate);
       if(spinning) globe.rotation.y+=0.004;
@@ -126,6 +154,8 @@
       document.getElementById('searchBox').classList.add('active');
     });
   }
+
+});
 </script>
 </body>
 </html>
