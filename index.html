@@ -131,20 +131,36 @@ document.getElementById('searchBox').classList.add('active');
 
 function pick(place){document.getElementById('destination').value=place;}
 
-function search(){
-const val=document.getElementById('destination').value.trim().toLowerCase();
-if(!val)return alert('Enter destination');
-document.getElementById('globeContainer').style.display='none';
-document.getElementById('mapWrapper').style.display='block';
-const locations={goa:[15.2993,74.124],rajasthan:[27.0238,74.2179],bali:[-8.3405,115.092],paris:[48.8566,2.3522],tokyo:[35.6762,139.6503]};
-const coords=locations[val];
-if(!coords)return alert('Location not mapped yet');
-const map=L.map('map',{zoomControl:false,scrollWheelZoom:false,doubleClickZoom:false,dragging:true,attributionControl:false}).setView(coords,5);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-L.marker(coords).addTo(map).bindPopup(val.toUpperCase()).openPopup();
-setTimeout(()=>map.invalidateSize(),300);
-document.getElementById('backBtn').style.display='inline-block';
-}
+<script>
+  function search() {
+    const input = document.getElementById("destination");
+    if (!input) return;
+
+    const val = input.value.trim().toLowerCase();
+
+    if (!val) {
+      alert("Please enter a destination");
+      return;
+    }
+
+    const routes = {
+      goa: "itineraries/goa.html",
+      rajasthan: "itineraries/rajasthan.html",
+      kerala: "itineraries/kerala.html",
+      himachal: "itineraries/himachal.html",
+      varanasi: "itineraries/varanasi.html"
+    };
+
+    if (!routes[val]) {
+      alert("Itinerary not available yet");
+      return;
+    }
+
+    // Redirect to itinerary page
+    window.location.href = routes[val];
+  }
+</script>
+
 
 // Back to globe
 document.getElementById('backBtn').addEventListener('click',()=>{
