@@ -49,26 +49,27 @@
 </div>
 
 <script>
-  // ---------- PICK LOCATION ----------
+  // -------- PICK FUNCTION --------
   function pick(place){ document.getElementById('destination').value = place; }
 
-  // ---------- SEARCH ----------
+  // -------- SEARCH FUNCTION --------
   function search(){
     const val = document.getElementById('destination').value.trim().toLowerCase();
     if(!val) return alert('Enter destination');
     window.location.href = `itineraries/${val}.html?map=${val}`;
   }
 
-  // ---------- URL PARAM CHECK ----------
+  // -------- URL PARAM CHECK --------
   const params = new URLSearchParams(window.location.search);
-  const mapLoc = params.get('map'); // only trigger map if ?map=<location> exists
+  const mapLoc = params.get('map');
 
   const globeCanvas = document.getElementById('globeCanvas');
   const mapDiv = document.getElementById('map');
 
   if(mapLoc){
-    globeCanvas.style.display = 'none';
-    mapDiv.style.display = 'block';
+    // Show map if ?map parameter exists
+    globeCanvas.style.display='none';
+    mapDiv.style.display='block';
 
     const locations = {
       goa:[15.2993,74.1240],
@@ -77,16 +78,17 @@
       himachal:[31.1048,77.1734],
       varanasi:[25.3176,82.9739]
     };
-
     const coords = locations[mapLoc];
     if(!coords) return alert('Location not mapped yet');
 
     const map = L.map('map').setView(coords,6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'© OpenStreetMap'
+    }).addTo(map);
     L.marker(coords).addTo(map).bindPopup(mapLoc.toUpperCase()).openPopup();
 
   }else{
-    // ---------- THREE.JS GLOBE ----------
+    // -------- SHOW GLOBE --------
     globeCanvas.style.display='block';
     mapDiv.style.display='none';
 
