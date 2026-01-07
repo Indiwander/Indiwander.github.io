@@ -1,161 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>IndiWander | Explore the World</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IndiWander | Explore</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Poppins',sans-serif;background:radial-gradient(circle at top,#020617,#000);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-  .wrapper{text-align:center;z-index:2;}
-  h1{font-size:2.4rem;margin-bottom:0.5rem;}
-  p{color:#94a3b8;margin-bottom:2rem;}
-  #globeCanvas, #map{width:350px;height:350px;margin:0 auto;border-radius:50%;}
-  .search-box{margin-top:2rem;opacity:0;transform:translateY(20px);transition:all 0.6s ease;pointer-events:none;}
-  .search-box.active{opacity:1;transform:translateY(0);pointer-events:auto;}
-  input{width:280px;padding:0.8rem 1.2rem;border-radius:30px;border:none;outline:none;font-size:1rem;}
-  .suggestions{margin-top:0.6rem;display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem;}
-  .suggestions span{background:#1e293b;padding:0.4rem 0.8rem;border-radius:20px;font-size:0.8rem;cursor:pointer;}
-  button{margin-top:1.2rem;background:#38bdf8;color:#020617;border:none;padding:0.6rem 1.8rem;border-radius:30px;font-size:1rem;cursor:pointer;}
-  button:hover{background:#0ea5e9;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:Poppins,sans-serif;
+  background:#000;
+  overflow:hidden;
+  color:white;
+}
+
+/* UI Overlay */
+.ui{
+  position:fixed;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  z-index:10;
+}
+
+.ui h1{font-size:2.5rem}
+.ui p{color:#94a3b8;margin-bottom:1.5rem}
+
+.search{
+  opacity:0;
+  transform:translateY(20px);
+  transition:.5s;
+  pointer-events:none;
+}
+
+.search.active{
+  opacity:1;
+  transform:none;
+  pointer-events:auto;
+}
+
+input{
+  padding:.8rem 1.4rem;
+  border-radius:30px;
+  border:none;
+  font-size:1rem;
+  width:260px;
+}
+
+button{
+  margin-top:1rem;
+  padding:.6rem 1.8rem;
+  border-radius:30px;
+  border:none;
+  background:#38bdf8;
+  color:#000;
+  font-weight:600;
+  cursor:pointer;
+}
+
+/* Map */
+#map{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:1;
+}
 </style>
 </head>
 
 <body>
-<div class="wrapper">
+
+<div id="map"></div>
+
+<div class="ui">
   <h1>Where do you want to go?</h1>
-  <p>Click the globe and start your journey</p>
+  <p>Click the globe to begin</p>
 
-  <div id="globeCanvas"></div>
-  <div id="map" style="display:none;"></div>
-
-  <div class="search-box" id="searchBox">
-    <input id="destination" placeholder="Search destination..." />
-    <div class="suggestions">
-      <span onclick="pick('goa')">Goa</span>
-      <span onclick="pick('rajasthan')">Rajasthan</span>
-      <span onclick="pick('kerala')">Kerala</span>
-      <span onclick="pick('himachal')">Himachal</span>
-      <span onclick="pick('varanasi')">Varanasi</span>
-    </div>
-    <button onclick="search()">Show Itinerary</button>
+  <div class="search" id="searchBox">
+    <input id="destination" placeholder="Search destination…">
+    <br>
+    <button onclick="search()">Show itinerary</button>
   </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+const params = new URLSearchParams(window.location.search);
+const mapLocation = params.get("map");
 
-  // ---------- PICK & SEARCH ----------
-  function pick(place){ document.getElementById('destination').value = place; }
-  window.pick = pick;
+/* ================= MAP MODE ================= */
+if(mapLocation){
+  document.getElementById("map").style.display="block";
 
-  function search(){
-    const val = document.getElementById('destination').value.trim().toLowerCase();
-    if(!val) return alert('Enter destination');
-    window.location.href = `itineraries/${val}.html?map=${val}`;
-  }
-  window.search = search;
+  const locations={
+    goa:[15.2993,74.1240],
+    rajasthan:[27.0238,74.2179],
+    kerala:[10.8505,76.2711],
+    himachal:[31.1048,77.1734],
+    varanasi:[25.3176,82.9739]
+  };
 
-  // ---------- URL PARAM ----------
-  const params = new URLSearchParams(window.location.search);
-  const mapLoc = params.get('map');
-
-  const globeCanvas = document.getElementById('globeCanvas');
-  const mapDiv = document.getElementById('map');
-
-  // ---------- SHOW MAP IF ?map EXISTS ----------
-  if(mapLoc){
-    globeCanvas.style.display='none';
-    mapDiv.style.display='block';
-
-    const locations = {
-      goa:[15.2993,74.1240],
-      rajasthan:[27.0238,74.2179],
-      kerala:[10.8505,76.2711],
-      himachal:[31.1048,77.1734],
-      varanasi:[25.3176,82.9739]
-    };
-
-    const coords = locations[mapLoc];
-    if(!coords) return alert('Location not mapped yet');
-
-    const map = L.map('map').setView(coords,6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      attribution:'© OpenStreetMap'
-    }).addTo(map);
-    L.marker(coords).addTo(map).bindPopup(mapLoc.toUpperCase()).openPopup();
-
-  }else{
-    // ---------- SHOW GLOBE ----------
-    globeCanvas.style.display='block';
-    mapDiv.style.display='none';
-    globeCanvas.innerHTML='';
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45,1,0.1,1000);
-    const renderer = new THREE.WebGLRenderer({alpha:true,antialias:true});
-    renderer.setSize(350,350);
-    globeCanvas.appendChild(renderer.domElement);
-
-    const geometry = new THREE.SphereGeometry(5,64,64);
-    const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg');
-    const material = new THREE.MeshStandardMaterial({map:texture,roughness:0.35,metalness:0.05});
-    const globe = new THREE.Mesh(geometry,material);
-    scene.add(globe);
-
-    const light = new THREE.PointLight(0xffffff,1.6);
-    light.position.set(10,10,10);
-    scene.add(light);
-    scene.add(new THREE.AmbientLight(0x404040,1.4));
-
-    // ---------- Major Destinations Markers ----------
-    const markerGeo = new THREE.SphereGeometry(0.15,16,16);
-    const markerMat = new THREE.MeshBasicMaterial({color:0xffcc00});
-    const destinations = {
-      goa:[15.2993,74.1240],
-      rajasthan:[27.0238,74.2179],
-      kerala:[10.8505,76.2711],
-      himachal:[31.1048,77.1734],
-      varanasi:[25.3176,82.9739]
-    };
-    for(let loc in destinations){
-      const [lat, lon] = destinations[loc];
-      const marker = new THREE.Mesh(markerGeo, markerMat);
-      const phi = (90-lat)*(Math.PI/180);
-      const theta = (lon+180)*(Math.PI/180);
-      const radius = 5;
-      marker.position.set(
-        -radius * Math.sin(phi) * Math.cos(theta),
-        radius * Math.cos(phi),
-        radius * Math.sin(phi) * Math.sin(theta)
-      );
-      scene.add(marker);
-    }
-
-    camera.position.z = 14;
-    let spinning=false, zooming=false;
-    function animate(){
-      requestAnimationFrame(animate);
-      if(spinning) globe.rotation.y+=0.004;
-      if(zooming && camera.position.z>8) camera.position.z-=0.05;
-      renderer.render(scene,camera);
-    }
-    animate();
-
-    globeCanvas.addEventListener('click',()=>{
-      spinning=true;
-      zooming=true;
-      document.getElementById('searchBox').classList.add('active');
-    });
+  const coords = locations[mapLocation];
+  if(coords){
+    const map = L.map("map").setView(coords,6);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    L.marker(coords).addTo(map).bindPopup(mapLocation.toUpperCase()).openPopup();
   }
 
-});
+}
+/* ================= GLOBE MODE ================= */
+else{
+
+  /* THREE JS FULLSCREEN CANVAS */
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  const texture = new THREE.TextureLoader().load(
+    "https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg"
+  );
+
+  const globe = new THREE.Mesh(
+    new THREE.SphereGeometry(5,64,64),
+    new THREE.MeshStandardMaterial({map:texture})
+  );
+  scene.add(globe);
+
+  scene.add(new THREE.AmbientLight(0x404040,1.5));
+  const light = new THREE.PointLight(0xffffff,2);
+  light.position.set(10,10,10);
+  scene.add(light);
+
+  camera.position.z = 14;
+
+  let spinning=false;
+
+  function animate(){
+    requestAnimationFrame(animate);
+    if(spinning) globe.rotation.y+=0.003;
+    renderer.render(scene,camera);
+  }
+  animate();
+
+  window.addEventListener("resize",()=>{
+    camera.aspect=window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth,window.innerHeight);
+  });
+
+  document.body.addEventListener("click",()=>{
+    spinning=true;
+    document.getElementById("searchBox").classList.add("active");
+  });
+
+  window.search=function(){
+    const val=document.getElementById("destination").value.trim().toLowerCase();
+    if(!val) return;
+    window.location.href=`itineraries/${val}.html`;
+  }
+}
 </script>
+
 </body>
 </html>
