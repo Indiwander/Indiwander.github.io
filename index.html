@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>IndiWander | Explore the World</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
   font-family: 'Poppins', sans-serif;
-  background: radial-gradient(circle at center, #020617 0%, #000 70%);
+  background: radial-gradient(circle at top, #020617, #000);
   color: white;
   min-height: 100vh;
   display: flex;
@@ -20,158 +21,173 @@ body {
   justify-content: center;
   overflow: hidden;
 }
-.wrapper { text-align: center; }
-h1 { font-size: 2.4rem; margin-bottom: 0.5rem; }
-p { color: #94a3b8; margin-bottom: 2rem; }
 
-#globeContainer { width: 400px; height: 400px; margin: 0 auto; position: relative; display: block; }
-#globeCanvas { width: 100%; height: 100%; }
-#mapWrapper { width: 400px; height: 400px; margin: 0 auto; border-radius: 50%; display: none; overflow: hidden; position: relative; }
-#map { width: 100%; height: 100%; }
-.leaflet-container { background: #000; }
-.leaflet-control-container { display: none; }
-.search-box { margin-top: 2rem; opacity: 0; transform: translateY(20px); transition: all 0.6s ease; pointer-events: none; }
-.search-box.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
-input { width: 280px; padding: 0.8rem 1.2rem; border-radius: 30px; border: none; outline: none; font-size: 1rem; }
-.suggestions { margin-top: 0.6rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
-.suggestions span { background: #1e293b; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; cursor: pointer; }
-button { margin-top: 1.2rem; background: #38bdf8; color: #020617; border: none; padding: 0.6rem 1.8rem; border-radius: 30px; font-size: 1rem; cursor: pointer; }
-button:hover { background: #0ea5e9; }
-#backBtn { display: none; margin-bottom: 1rem; background:#1e293b; color:#fff; border:none; padding:0.5rem 1.4rem; border-radius:999px; cursor:pointer; position: relative; z-index: 10; }
-audio { display: none; }
+.wrapper {
+  text-align: center;
+  z-index: 2;
+}
+
+h1 {
+  font-size: 2.4rem;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  color: #94a3b8;
+  margin-bottom: 2rem;
+}
+
+#globeContainer {
+  width: 320px;
+  height: 320px;
+  margin: auto;
+  cursor: pointer;
+}
+
+.search-box {
+  margin-top: 2rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.5s ease;
+  pointer-events: none;
+}
+
+.search-box.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+input {
+  width: 280px;
+  padding: 0.8rem 1.2rem;
+  border-radius: 30px;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+}
+
+button {
+  margin-top: 1.2rem;
+  background: #38bdf8;
+  color: #020617;
+  border: none;
+  padding: 0.6rem 1.8rem;
+  border-radius: 30px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0ea5e9;
+}
 </style>
 </head>
+
 <body>
 
 <div class="wrapper">
-<h1>Where do you want to go?</h1>
-<p>Click the globe and start your journey</p>
-<div id="globeContainer"><div id="globeCanvas"></div></div>
-<button id="backBtn">← Back to Globe</button>
-<div id="mapWrapper"><div id="map"></div></div>
-<div class="search-box" id="searchBox">
-<input id="destination" placeholder="Search destination..." />
-<div class="suggestions">
-<span onclick="pick('goa')">Goa</span>
-<span onclick="pick('rajasthan')">Rajasthan</span>
-<span onclick="pick('bali')">Bali</span>
-<span onclick="pick('paris')">Paris</span>
-<span onclick="pick('tokyo')">Tokyo</span>
-</div>
-<button onclick="search()">Show Itinerary</button>
-</div>
-</div>
+  <h1>Where do you want to go?</h1>
+  <p>Click the globe and start your journey</p>
 
-<audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-fast-small-sweep-transition-166.wav"></audio>
+  <div id="globeContainer"></div>
+
+  <div class="search-box" id="searchBox">
+    <input id="destination" placeholder="Search destination (e.g. Goa)" />
+    <button onclick="search()">Show Itinerary</button>
+  </div>
+</div>
 
 <script>
-const globeCanvasContainer = document.getElementById('globeCanvas');
+/* ================== THREE.JS GLOBE ================== */
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-camera.position.z = 16;
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-renderer.setSize(globeCanvasContainer.clientWidth, globeCanvasContainer.clientHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-globeCanvasContainer.appendChild(renderer.domElement);
+
+const camera = new THREE.PerspectiveCamera(
+  45,
+  1,
+  0.1,
+  1000
+);
+camera.position.z = 14;
+
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  alpha: true
+});
+renderer.setSize(320, 320);
+renderer.setPixelRatio(window.devicePixelRatio);
+
+document
+  .getElementById("globeContainer")
+  .appendChild(renderer.domElement);
 
 const geometry = new THREE.SphereGeometry(5, 64, 64);
-const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg');
-const material = new THREE.MeshPhysicalMaterial({ map: texture, roughness:0.25, metalness:0, clearcoat:0.4, clearcoatRoughness:0.2 });
+const texture = new THREE.TextureLoader().load(
+  "https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg"
+);
+
+const material = new THREE.MeshStandardMaterial({
+  map: texture,
+  roughness: 0.35,
+  metalness: 0.05
+});
+
 const globe = new THREE.Mesh(geometry, material);
 scene.add(globe);
-scene.add(new THREE.AmbientLight(0xffffff,0.6));
-const sun = new THREE.DirectionalLight(0xffffff,1.4);
-sun.position.set(10,10,10);
-scene.add(sun);
 
-// Destination lights
-const destinations=[
-  {name:'India',lat:20.6,lon:78.9},
-  {name:'France',lat:46.2,lon:2.2},
-  {name:'Japan',lat:36.2,lon:138.3},
-  {name:'Indonesia',lat:-2.5,lon:118.0},
-  {name:'Italy',lat:41.9,lon:12.6},
-  {name:'USA',lat:39.8,lon:-98.6}
-];
-const lightGroup=new THREE.Group();
-const lightMaterial=new THREE.MeshBasicMaterial({color:0xffd700});
-function latLngToVector3(lat,lon,radius){const phi=(90-lat)*(Math.PI/180);const theta=(lon+180)*(Math.PI/180);return new THREE.Vector3(-radius*Math.sin(phi)*Math.cos(theta),radius*Math.cos(phi),radius*Math.sin(phi)*Math.sin(theta));}
-destinations.forEach(dest=>{const markerGeo=new THREE.SphereGeometry(0.12,16,16);const marker=new THREE.Mesh(markerGeo,lightMaterial.clone());marker.position.copy(latLngToVector3(dest.lat,dest.lon,5.05));marker.userData=dest;lightGroup.add(marker);});
-scene.add(lightGroup);
+const light = new THREE.PointLight(0xffffff, 1.5);
+light.position.set(10, 10, 10);
+scene.add(light);
 
-let spinning=false,zooming=false,hoveredMarker=null,clickedOnce=false;
-const raycaster=new THREE.Raycaster();
-const mouse=new THREE.Vector2();
+const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambient);
 
-function animate(){requestAnimationFrame(animate);if(spinning)globe.rotation.y+=0.004;renderer.render(scene,camera);}animate();
+let rotating = true;
 
-// Globe click to rotate only once
-renderer.domElement.addEventListener('click',()=>{
-  if(!clickedOnce){spinning=true; zooming=true; clickedOnce=true;
-  document.getElementById('searchBox').classList.add('active'); document.getElementById('spinSound').play();}
-});
+function animate() {
+  requestAnimationFrame(animate);
+  if (rotating) globe.rotation.y += 0.003;
+  renderer.render(scene, camera);
+}
+animate();
 
-// Hover detection
-renderer.domElement.addEventListener('mousemove',e=>{
-const rect=renderer.domElement.getBoundingClientRect();
-mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
-mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
-raycaster.setFromCamera(mouse,camera);
-const intersects=raycaster.intersectObjects(lightGroup.children);
-if(intersects.length>0){const obj=intersects[0].object;
-if(hoveredMarker!==obj){if(hoveredMarker)hoveredMarker.scale.set(1,1,1);hoveredMarker=obj;hoveredMarker.scale.set(1.8,1.8,1.8);document.body.style.cursor='pointer';}}
-else{if(hoveredMarker)hoveredMarker.scale.set(1,1,1);hoveredMarker=null;document.body.style.cursor='default';}});
+/* ================== INTERACTION ================== */
+document
+  .getElementById("globeContainer")
+  .addEventListener("click", () => {
+    rotating = true;
+    document
+      .getElementById("searchBox")
+      .classList.add("active");
+  });
 
-// Click marker
-renderer.domElement.addEventListener('click',()=>{
-if(!hoveredMarker) return;
-document.getElementById('destination').value=hoveredMarker.userData.name.toLowerCase();
-document.getElementById('searchBox').classList.add('active');
-});
+/* ================== SEARCH ROUTING ================== */
+function search() {
+  const val = document
+    .getElementById("destination")
+    .value.trim()
+    .toLowerCase();
 
-function pick(place){document.getElementById('destination').value=place;}
-
-<script>
-  function search() {
-    const input = document.getElementById("destination");
-    if (!input) return;
-
-    const val = input.value.trim().toLowerCase();
-
-    if (!val) {
-      alert("Please enter a destination");
-      return;
-    }
-
-    const routes = {
-      goa: "itineraries/goa.html",
-      rajasthan: "itineraries/rajasthan.html",
-      kerala: "itineraries/kerala.html",
-      himachal: "itineraries/himachal.html",
-      varanasi: "itineraries/varanasi.html"
-    };
-
-    if (!routes[val]) {
-      alert("Itinerary not available yet");
-      return;
-    }
-
-    // Redirect to itinerary page
-    window.location.href = routes[val];
+  if (!val) {
+    alert("Please enter a destination");
+    return;
   }
-</script>
 
+  const routes = {
+    goa: "itineraries/goa.html",
+    rajasthan: "itineraries/rajasthan.html",
+    kerala: "itineraries/kerala.html",
+    himachal: "itineraries/himachal.html",
+    varanasi: "itineraries/varanasi.html"
+  };
 
-// Back to globe
-document.getElementById('backBtn').addEventListener('click',()=>{
-document.getElementById('mapWrapper').style.display='none';
-document.getElementById('backBtn').style.display='none';
-document.getElementById('globeContainer').style.display='block';
-renderer.setSize(globeCanvasContainer.clientWidth,globeCanvasContainer.clientHeight);
-camera.aspect=globeCanvasContainer.clientWidth/globeCanvasContainer.clientHeight;
-camera.updateProjectionMatrix();
-spinning=false; zooming=false; clickedOnce=false;
-});
+  if (!routes[val]) {
+    alert("Itinerary not available yet");
+    return;
+  }
+
+  window.location.href = routes[val];
+}
 </script>
 
 </body>
