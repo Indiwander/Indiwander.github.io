@@ -1,141 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Goa Itinerary | IndiWander</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goa Itinerary | IndiWander</title>
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      min-height: 100vh;
-      background-image: url("../assets/images/goa-bg.png");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      position: relative;
-      color: #ffffff;
-    }
+body{
+  font-family:'Poppins',sans-serif;
+  min-height:100vh;
+  background:
+    linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+    url("../assets/images/goa-bg.png");
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+  color:white;
+}
 
-    /* Dark overlay for readability */
-    body::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 0;
-    }
+/* Layout container */
+.wrapper{
+  max-width:900px;
+  margin:0 auto;
+  padding:3rem 1.5rem;
+}
 
-    .container {
-      position: relative;
-      z-index: 1;
-      max-width: 900px;
-      margin: auto;
-      padding: 3rem 1.5rem;
-    }
+/* Back button */
+.back-btn{
+  display:inline-block;
+  margin-bottom:2rem;
+  padding:.6rem 1.4rem;
+  border-radius:30px;
+  background:#38bdf8;
+  color:#000;
+  font-weight:600;
+  text-decoration:none;
+}
 
-    h1 {
-      font-size: 3rem;
-      margin-bottom: 0.5rem;
-    }
+/* Glass card */
+.card{
+  background:rgba(0,0,0,0.55);
+  backdrop-filter:blur(8px);
+  border-radius:20px;
+  padding:2rem;
+}
 
-    .subtitle {
-      color: #e2e8f0;
-      margin-bottom: 2rem;
-    }
+/* Headings */
+h1{
+  font-size:2.5rem;
+  margin-bottom:.5rem;
+}
 
-    .day {
-      background: rgba(255, 255, 255, 0.12);
-      border-radius: 18px;
-      padding: 1.4rem 1.6rem;
-      margin-bottom: 1.2rem;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-    }
-
-    .day h3 {
-      margin-bottom: 0.4rem;
-      color: #fde68a;
-    }
-
-    .day p {
-      color: #f1f5f9;
-      line-height: 1.6;
-    }
-
-    .back-btn {
-      display: inline-block;
-      margin-top: 2rem;
-      padding: 0.7rem 1.6rem;
-      background: #38bdf8;
-      color: #020617;
-      border-radius: 30px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: background 0.3s ease;
-    }
-
-    .back-btn:hover {
-      background: #0ea5e9;
-    }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2.2rem;
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-  <div class="container">
-    <h1>Goa Itinerary</h1>
-    <p class="subtitle">Sun, beaches & culture — 4 days in Goa 🌴</p>
-
-    <div class="day">
-      <h3>Day 1 – Arrival & Beach Time</h3>
-      <p>
-        Arrive in Goa, check into your hotel. Relax at Baga or Calangute Beach.
-        Enjoy sunset views and beach shacks in the evening.
-      </p>
-    </div>
-
-    <div class="day">
-      <h3>Day 2 – North Goa Exploration</h3>
-      <p>
-        Visit Fort Aguada, Anjuna Beach, Vagator Beach and local flea markets.
-        Experience Goa’s nightlife or a beachside café.
-      </p>
-    </div>
-
-    <div class="day">
-      <h3>Day 3 – South Goa & Heritage</h3>
-      <p>
-        Explore Colva and Benaulim beaches. Visit Basilica of Bom Jesus and Old Goa
-        churches for a cultural touch.
-      </p>
-    </div>
-
-    <div class="day">
-      <h3>Day 4 – Leisure & Departure</h3>
-      <p>
-        Enjoy a relaxed morning, souvenir shopping, café hopping, and depart with
-        unforgettable memories.
-      </p>
-    </div>
-
-    <a href="../index.html" class="back-btn">← Back to Globe</a>
-  </div>
-
-</body>
-</html>
+.subtitl
