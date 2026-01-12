@@ -14,10 +14,10 @@
       padding: 0;
       width: 100%;
       height: 100%;
-      overflow: hidden;
       font-family: 'Segoe UI', sans-serif;
       background: radial-gradient(circle at top, #050b1f, #000);
       color: white;
+      overflow: hidden;
     }
 
     #container {
@@ -26,8 +26,15 @@
       height: 100vh;
     }
 
-    canvas {
-      display: block;
+    h1 {
+      position: absolute;
+      top: 28px;
+      width: 100%;
+      text-align: center;
+      font-weight: 600;
+      letter-spacing: 1px;
+      z-index: 10;
+      pointer-events: none;
     }
 
     #ui {
@@ -63,15 +70,22 @@
       background: #ffea70;
     }
 
-    h1 {
-      position: absolute;
-      top: 30px;
-      width: 100%;
-      text-align: center;
-      font-weight: 600;
-      letter-spacing: 1px;
-      z-index: 10;
-      pointer-events: none;
+    canvas {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.4rem;
+      }
+
+      #destination {
+        width: 220px;
+      }
+
+      #ui {
+        bottom: 40px;
+      }
     }
   </style>
 </head>
@@ -79,8 +93,13 @@
 
 <div id="container">
   <h1>Where do you want to go?</h1>
+
   <div id="ui">
-    <input id="destination" type="text" placeholder="Search destination (Goa, Kerala...)" />
+    <input
+      id="destination"
+      type="text"
+      placeholder="Search destination (Goa, Kerala...)"
+    />
     <button id="searchBtn">Search</button>
   </div>
 </div>
@@ -119,18 +138,48 @@
   const globe = new THREE.Mesh(geometry, material);
   scene.add(globe);
 
-  // Lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-  scene.add(ambientLight);
+  // Glow
+  const glowGeometry = new THREE.SphereGeometry(0.83, 64, 64);
+  const glowMaterial = new THREE.MeshBasicMaterial({
+    color: 0x66ccff,
+    transparent: true,
+    opacity: 0.15
+  });
+  const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+  scene.add(glow);
 
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-  directionalLight.position.set(5, 3, 5);
-  scene.add(directionalLight);
+  // Lighting
+  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  dirLight.position.set(5, 3, 5);
+  scene.add(dirLight);
+
+  // India marker
+  const markerGeometry = new THREE.SphereGeometry(0.03, 16, 16);
+  const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xffd000 });
+  const indiaMarker = new THREE.Mesh(markerGeometry, markerMaterial);
+
+  function latLongToVector3(lat, lon, radius) {
+    const phi = (90 - lat) * (Math.PI / 180);
+    const theta = (lon + 180) * (Math.PI / 180);
+    return new THREE.Vector3(
+      -(radius * Math.sin(phi) * Math.cos(theta)),
+      radius * Math.cos(phi),
+      radius * Math.sin(phi) * Math.sin(theta)
+    );
+  }
+
+  indiaMarker.position.copy(
+    latLongToVector3(20.5937, 78.9629, 0.82)
+  );
+  scene.add(indiaMarker);
 
   // Animation
   function animate() {
     requestAnimationFrame(animate);
     globe.rotation.y += 0.002;
+    glow.rotation.y += 0.002;
     renderer.render(scene, camera);
   }
   animate();
