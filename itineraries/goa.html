@@ -1,138 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Goa Itinerary | IndiWander</title>
+  <meta charset="UTF-8">
+  <title>Goa Travel Itinerary</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      background:
+        linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+        url("../assets/images/goa-bg.jpg") no-repeat center center / cover;
+      min-height: 100vh;
+    }
 
-<style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 30px 20px 80px;
+    }
 
-body{
-  font-family:'Poppins',sans-serif;
-  min-height:100vh;
-  background:
-    linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
-    url("../assets/images/goa-bg.png");
-  background-size:cover;
-  background-position:center;
-  background-attachment:fixed;
-  color:white;
-}
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 20px;
+      text-decoration: none;
+      color: #ffd000;
+      font-weight: 600;
+    }
 
-/* Layout container */
-.wrapper{
-  max-width:900px;
-  margin:0 auto;
-  padding:3rem 1.5rem;
-}
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
 
-/* Back button */
-.back-btn{
-  display:inline-block;
-  margin-bottom:2rem;
-  padding:.6rem 1.4rem;
-  border-radius:30px;
-  background:#38bdf8;
-  color:#000;
-  font-weight:600;
-  text-decoration:none;
-}
+    .subtitle {
+      text-align: center;
+      margin-bottom: 40px;
+      opacity: 0.9;
+    }
 
-/* Glass card */
-.card{
-  background:rgba(0,0,0,0.55);
-  backdrop-filter:blur(8px);
-  border-radius:20px;
-  padding:2rem;
-}
+    /* Attractions */
+    .attractions h2,
+    .planner h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
 
-/* Headings */
-h1{
-  font-size:2.5rem;
-  margin-bottom:.5rem;
-}
+    .attraction-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
 
-.subtitle{
-  color:#cbd5f5;
-  margin-bottom:2rem;
-}
+    .card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
 
-/* Day sections */
-.day{
-  margin-bottom:1.8rem;
-}
+    .card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
 
-.day h3{
-  color:#38bdf8;
-  margin-bottom:.4rem;
-}
+    .card:hover img {
+      transform: scale(1.08);
+    }
 
-.day p{
-  line-height:1.6;
-  color:#e5e7eb;
-}
-</style>
+    .caption {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+      font-weight: 500;
+    }
+
+    /* Planner */
+    .planner {
+      margin: 70px auto;
+      padding: 30px 20px;
+      max-width: 900px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 22px;
+      text-align: center;
+    }
+
+    .planner-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .planner select,
+    .planner button {
+      padding: 14px 18px;
+      border-radius: 30px;
+      border: none;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .planner select {
+      min-width: 160px;
+    }
+
+    .planner button {
+      background: #ffd000;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .planner button:hover {
+      background: #ffea70;
+    }
+
+    .plan-result {
+      margin-top: 30px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="wrapper">
+  <div class="container">
+    <a class="back-btn" href="../index.html">← Back to Globe</a>
 
-  <!-- Back to globe (opens map view) -->
-  <a class="back-btn" href="../index.html?map=goa">← Back to Globe</a>
+    <h1>Goa Travel Itinerary</h1>
+    <p class="subtitle">Beaches, culture, nightlife & nature</p>
 
-  <div class="card">
-    <h1>Goa Itinerary</h1>
-    <p class="subtitle">Sun, beaches, culture & nightlife</p>
+    <!-- Attractions -->
+    <section class="attractions">
+      <h2>Major Attractions</h2>
 
-    <div class="day">
-      <h3>Day 1 – North Goa</h3>
-      <p>
-        Arrive in Goa, check in to your hotel. Visit Baga, Calangute and Anjuna beaches.
-        Enjoy water sports and sunset at Vagator Beach.
-      </p>
-    </div>
+      <div class="attraction-grid">
+        <div class="card">
+          <img src="../assets/images/goa/beach.jpg" alt="Goa Beach">
+          <div class="caption">Baga & Calangute Beach</div>
+        </div>
 
-    <div class="day">
-      <h3>Day 2 – Culture & Heritage</h3>
-      <p>
-        Explore Old Goa churches – Basilica of Bom Jesus and Se Cathedral.
-        Visit Fontainhas Latin Quarter and enjoy authentic Goan cuisine.
-      </p>
-    </div>
+        <div class="card">
+          <img src="../assets/images/goa/fort-aguada.jpg" alt="Fort Aguada">
+          <div class="caption">Fort Aguada</div>
+        </div>
 
-    <div class="day">
-      <h3>Day 3 – South Goa</h3>
-      <p>
-        Relax at Colva and Benaulim beaches.
-        Visit Cabo de Rama Fort for panoramic sea views.
-      </p>
-    </div>
+        <div class="card">
+          <img src="../assets/images/goa/dudhsagar.jpg" alt="Dudhsagar Falls">
+          <div class="caption">Dudhsagar Waterfalls</div>
+        </div>
+      </div>
+    </section>
 
-    <div class="day">
-      <h3>Day 4 – Adventure & Nightlife</h3>
-      <p>
-        Dudhsagar waterfall trip or spice plantation tour.
-        Evening Mandovi river cruise and nightlife exploration.
-      </p>
-    </div>
+    <!-- Planner -->
+    <section class="planner">
+      <h2>Plan My Travel</h2>
 
-    <div class="day">
-      <h3>Day 5 – Leisure & Departure</h3>
-      <p>
-        Shopping at flea markets, beach relaxation and departure.
-      </p>
-    </div>
+      <div class="planner-box">
+        <select id="days">
+          <option value="">Trip Duration</option>
+          <option value="3">3 Days</option>
+          <option value="5">5 Days</option>
+          <option value="7">7 Days</option>
+        </select>
 
+        <select id="travelType">
+          <option value="">Travel Type</option>
+          <option value="Solo">Solo</option>
+          <option value="Couple">Couple</option>
+          <option value="Family">Family</option>
+          <option value="Friends">Friends</option>
+        </select>
+
+        <select id="budget">
+          <option value="">Budget</option>
+          <option value="Budget">Budget</option>
+          <option value="Mid-range">Mid-range</option>
+          <option value="Luxury">Luxury</option>
+        </select>
+
+        <button onclick="planTrip()">Plan My Travel</button>
+      </div>
+
+      <div id="planResult" class="plan-result"></div>
+    </section>
   </div>
-</div>
+
+  <script>
+    function planTrip() {
+      const days = document.getElementById('days').value;
+      const type = document.getElementById('travelType').value;
+      const budget = document.getElementById('budget').value;
+
+      if (!days || !type || !budget) {
+        alert("Please select all options");
+        return;
+      }
+
+      document.getElementById('planResult').innerHTML = `
+        ✈️ <strong>Your Goa Trip Plan</strong><br><br>
+        🗓 Duration: <strong>${days} days</strong><br>
+        👥 Travel Type: <strong>${type}</strong><br>
+        💰 Budget: <strong>${budget}</strong><br><br>
+        ✔️ Beaches, sightseeing, food & relaxed pacing curated for you.
+      `;
+    }
+  </script>
 
 </body>
 </html>
